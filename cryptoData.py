@@ -1,6 +1,5 @@
 import cryptocompare as cc
-from datetime import datetime
-import datetime
+from datetime import datetime, date
 import json
 import pandas as pd
 
@@ -20,7 +19,7 @@ def GetCurrentPrice():
         current_time = now.strftime('%Y-%m-%d %H:%M:%S')
 
         result['currency'] = currency
-        result['time'] = current_time    
+        result['time'] = current_time 
 
         string = json.dumps(result)
         df = pd.read_json(string)
@@ -38,20 +37,26 @@ def GetDataForDay():
 
     result = cc.get_historical_price_day(coin, currency=currency, limit=30)
 
-    for coin in result:
-        ts = datetime.datetime.fromtimestamp(coin['time']).strftime('%Y-%m-%d')
+    for value in result:
+        ts = datetime.fromtimestamp(value['time']).strftime('%Y-%m-%d')
         print('===============================================')
-        print('Time: ' + str(ts) + ', High: ' + str(coin['high']) + ', Low: ' + str(coin['low']))
+        print('Time: ' + str(ts) + ', High: ' + str(value['high']) + ', Low: ' + str(value['low']))
 
     print('===============================================')
 
     if(save == 'y'):
-        for day in result:        
-            day['currency'] = currency
+        for day in result:   
+            day['coin'] = coin
+            day['currency'] = currency            
 
+        #Save as json
+        with open('Crypto_Data_For_Day_' + ts + '.json', 'w') as fp:
+            json.dump(result, fp)
+
+        #Save as csv
         string = json.dumps(result)
         df = pd.read_json(string)
-        df.to_csv('Crypto_Data_For_Day.csv', mode='a', encoding='utf-8', index=False)
+        df.to_csv('Crypto_Data_For_Day_' + ts + '.csv', mode='w', encoding='utf-8', index=False)
 
 def GetDataForHour():
     coin = input('\nEnter desired coin (BTC, ETH, ...): ')
@@ -60,20 +65,24 @@ def GetDataForHour():
 
     result = cc.get_historical_price_hour(coin, currency=currency, limit=24)
 
-    for coin in result:
-        ts = datetime.datetime.fromtimestamp(coin['time']).strftime('%Y-%m-%d %H:%M:%S')
+    for value in result:
+        ts = datetime.fromtimestamp(value['time']).strftime('%Y-%m-%d %H:%M:%S')
         print('===============================================')
-        print('Time: ' + str(ts) + ', High: ' + str(coin['high']) + ', Low: ' + str(coin['low']))
+        print('Time: ' + str(ts) + ', High: ' + str(value['high']) + ', Low: ' + str(value['low']))
 
     print('===============================================')
 
     if(save == 'y'):
         for hour in result:
+            hour['coin'] = coin
             hour['currency'] = currency
+ 
+        with open('Crypto_Data_For_Hour.json', 'w') as fp:
+            json.dump(result, fp)
 
         string = json.dumps(result)
         df = pd.read_json(string)
-        df.to_csv('Crypto_Data_For_Hour.csv', mode='a', encoding='utf-8', index=False)
+        df.to_csv('Crypto_Data_For_Hour.csv', mode='w', encoding='utf-8', index=False)
 
 def GetDataForMinute():
     coin = input('\nEnter desired coin (BTC, ETH, ...): ')
@@ -83,7 +92,7 @@ def GetDataForMinute():
     result = cc.get_historical_price_minute(coin, currency=currency, limit=300)
 
     for coin in result:
-        ts = datetime.datetime.fromtimestamp(coin['time']).strftime('%Y-%m-%d %H:%M:%S')
+        ts = datetime.fromtimestamp(coin['time']).strftime('%Y-%m-%d %H:%M:%S')
         print('===============================================')
         print('Time: ' + str(ts) + ', High: ' + str(coin['high']) + ', Low: ' + str(coin['low']))
 
@@ -93,9 +102,12 @@ def GetDataForMinute():
         for minute in result:        
             minute['currency'] = currency
 
-        string = json.dumps(result)
-        df = pd.read_json(string)
-        df.to_csv('Crypto_Data_For_Minute.csv', mode='a', encoding='utf-8', index=False)
+    with open('Crypto_Data_For_Minute.json', 'w') as fp:
+        json.dump(result, fp)
+
+    string = json.dumps(result)
+    df = pd.read_json(string)
+    df.to_csv('Crypto_Data_For_Minute.csv', mode='w', encoding='utf-8', index=False)
 
 def GetExchanges():
     excahnges = cc.get_exchanges()
