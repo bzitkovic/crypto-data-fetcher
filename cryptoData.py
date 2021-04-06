@@ -63,6 +63,9 @@ def GetDataForHour():
     currency = input('Enter desired currency (USD, EUR, ...): ')
     save = input('Save data to file? y/n ')
 
+    now = datetime.now()
+    current_time = now.strftime('%Y-%m-%d')
+
     result = cc.get_historical_price_hour(coin, currency=currency, limit=24)
 
     for value in result:
@@ -77,17 +80,20 @@ def GetDataForHour():
             hour['coin'] = coin
             hour['currency'] = currency
  
-        with open('Crypto_Data_For_Hour.json', 'w') as fp:
+        with open('Crypto_Data_For_Hour_' + current_time + '.json', 'w') as fp:
             json.dump(result, fp)
 
         string = json.dumps(result)
         df = pd.read_json(string)
-        df.to_csv('Crypto_Data_For_Hour.csv', mode='w', encoding='utf-8', index=False)
+        df.to_csv('Crypto_Data_For_Hour_' + current_time + '.csv', mode='w', encoding='utf-8', index=False)
 
 def GetDataForMinute():
     coin = input('\nEnter desired coin (BTC, ETH, ...): ')
     currency = input('Enter desired currency (USD, EUR, ...): ')
     save = input('Save data to file? y/n ')
+
+    now = datetime.now()
+    current_time = now.strftime('%Y-%m-%d')
 
     result = cc.get_historical_price_minute(coin, currency=currency, limit=300)
 
@@ -102,12 +108,12 @@ def GetDataForMinute():
         for minute in result:        
             minute['currency'] = currency
 
-    with open('Crypto_Data_For_Minute.json', 'w') as fp:
+    with open('Crypto_Data_For_Minute_' + current_time + '.json', 'w') as fp:
         json.dump(result, fp)
 
     string = json.dumps(result)
     df = pd.read_json(string)
-    df.to_csv('Crypto_Data_For_Minute.csv', mode='w', encoding='utf-8', index=False)
+    df.to_csv('Crypto_Data_For_Minute_' + current_time + '.csv', mode='w', encoding='utf-8', index=False)
 
 def GetExchanges():
     excahnges = cc.get_exchanges()
